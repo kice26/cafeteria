@@ -1,0 +1,1 @@
+const C='menu-v2';self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['./','./index.html','./manifest.webmanifest']))));self.addEventListener('fetch',e=>{if(e.request.url.includes('menu.json'))e.respondWith(fetch(e.request,{cache:'no-store'}));else e.respondWith(caches.match(e.request).then(x=>x||fetch(e.request)))});
