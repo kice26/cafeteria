@@ -1,4 +1,4 @@
-name: Update weekly menu
+name: Update and deploy weekly menu
 
 on:
   workflow_dispatch:
@@ -10,10 +10,15 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
-  update:
+  update-and-deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
 
@@ -22,9 +27,21 @@ jobs:
         env:
           MENU_YEAR: ${{ vars.MENU_YEAR }}
 
-      - name: Save updated menu file
+      - name: Save generated menu data
         run: |
-          git config user.name "menu-updater[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name 'menu-updater[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add menu.json
-          git diff --staged --quiet || (git commit -m "Update weekly menu data" && git push)
+          git diff --staged --quiet || (git commit -m 'Update weekly menu data' && git push)
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload updated site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
+
+      - name: Deploy updated site
+        id: deployment
+        uses: actions/deploy-pages@v4
